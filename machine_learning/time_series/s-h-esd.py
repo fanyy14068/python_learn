@@ -106,7 +106,7 @@ def detect_anoms(data, k=0.49, alpha=0.05, num_obs_per_period=None, one_tail=Tru
             'anoms': [item for item in anoms_idx if item in data.index],
             'res_median': res_median,
             'data_median': data.median(),
-            'threshold': threshold,
+            'threshold': calc_ares(threshold, res_median, one_tail, upper_tail),
             'seasonal': decomp.seasonal[-num_obs_per_period:].tolist(),
             'seasonal_index': int(ts.index[-num_obs_per_period].value / 1e9),
             'direction': [one_tail, upper_tail],
@@ -141,9 +141,7 @@ def detect_anoms_online(ts, model, time_interval=60, num_obs_per_period=1440):
 
     one_tail, upper_tail = model['direction']
     ares = calc_ares(resids, model['res_median'], one_tail, upper_tail)
-    threshold = calc_ares(model['threshold'], model['res_median'], one_tail, upper_tail)
-
-    anoms_idx = ts_without_na[ares > threshold].index
+    anoms_idx = ts_without_na[ares > model['threshold']].index
     return [item for item in anoms_idx if item in ts.index]
 
 
